@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>自动化测试报告</title>
+    <meta name="generator" content="HTMLTestRunner 0.8.3"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    
+<style type="text/css" media="screen">
+body        { font-family: verdana, arial, helvetica, sans-serif; font-size: 80%; }
+table       { font-size: 100%; }
+pre         { }
+
+/* -- heading ---------------------------------------------------------------------- */
+h1 {
+	font-size: 16pt;
+	color: gray;
+}
+.heading {
+    margin-top: 0ex;
+    margin-bottom: 1ex;
+}
+
+.heading .attribute {
+    margin-top: 1ex;
+    margin-bottom: 0;
+}
+
+.heading .description {
+    margin-top: 4ex;
+    margin-bottom: 6ex;
+}
+
+/* -- css div popup ------------------------------------------------------------------------ */
+a.popup_link {
+}
+
+a.popup_link:hover {
+    color: red;
+}
+.img{
+	width: 100%;
+	height: 100%;
+	border-collapse: collapse;
+    border: 2px solid #777;
+}
+
+.screenshots {
+    z-index: 100;
+	position:absolute;
+	left: 23%;
+	top: 20%;
+	display: none;
+}
+.close_shots {
+	position:absolute;
+	top:0; left:98%;
+	z-index:99;
+	width:20px;
+}
+.popup_window {
+    display: none;
+    position: relative;
+    left: 0px;
+    top: 0px;
+    /*border: solid #627173 1px; */
+    padding: 10px;
+    background-color: #E6E6D6;
+    font-family: "Lucida Console", "Courier New", Courier, monospace;
+    text-align: left;
+    font-size: 8pt;
+    width: 500px;
+}
+
+}
+/* -- report ------------------------------------------------------------------------ */
+#show_detail_line {
+    margin-top: 3ex;
+    margin-bottom: 1ex;
+}
+#result_table {
+    width: 80%;
+    border-collapse: collapse;
+    border: 1px solid #777;
+}
+#header_row {
+    font-weight: bold;
+    color: white;
+    background-color: #777;
+}
+#result_table td {
+    border: 1px solid #777;
+    padding: 2px;
+}
+#total_row  { font-weight: bold; }
+.passClass  { background-color: #6c6; }
+.failClass  { background-color: #c60; }
+.errorClass { background-color: #c00; }
+.passCase   { color: #6c6; }
+.failCase   { color: #c60; font-weight: bold; }
+.errorCase  { color: #c00; font-weight: bold; }
+.hiddenRow  { display: none; }
+.testcase   { margin-left: 2em; }
+
+
+/* -- ending ---------------------------------------------------------------------- */
+#ending {
+}
+
+
+.piechart{
+    position:absolute;  ;
+    top:20px;
+    left:300px;
+    width: 200px;
+    float: left;
+    display:  inline;
+}
+
+
+</style>
+
+</head>
+<body>
+<script language="javascript" type="text/javascript">
+output_list = Array();
+
+/* level - 0:Summary; 1:Failed; 2:All */
+function showCase(level) {
+    trs = document.getElementsByTagName("tr");
+    for (var i = 0; i < trs.length; i++) {
+        tr = trs[i];
+        id = tr.id;
+        if (id.substr(0,2) == 'ft') {
+            if (level < 1) {
+                tr.className = 'hiddenRow';
+            }
+            else {
+                tr.className = '';
+            }
+        }
+        if (id.substr(0,2) == 'pt') {
+            if (level > 1) {
+                tr.className = '';
+            }
+            else {
+                tr.className = 'hiddenRow';
+            }
+        }
+    }
+}
+
+
+function showClassDetail(cid, count) {
+    var id_list = Array(count);
+    var toHide = 1;
+    for (var i = 0; i < count; i++) {
+        tid0 = 't' + cid.substr(1) + '.' + (i+1);
+        tid = 'f' + tid0;
+        tr = document.getElementById(tid);
+        if (!tr) {
+            tid = 'p' + tid0;
+            tr = document.getElementById(tid);
+        }
+        id_list[i] = tid;
+        if (tr.className) {
+            toHide = 0;
+        }
+    }
+    for (var i = 0; i < count; i++) {
+        tid = id_list[i];
+        if (toHide) {
+            document.getElementById('div_'+tid).style.display = 'none'
+            document.getElementById(tid).className = 'hiddenRow';
+        }
+        else {
+            document.getElementById(tid).className = '';
+        }
+    }
+}
+
+
+function showTestDetail(div_id){
+    var details_div = document.getElementById(div_id)
+    var displayState = details_div.style.display
+    // alert(displayState)
+    if (displayState != 'block' ) {
+        displayState = 'block'
+        details_div.style.display = 'block'
+    }
+    else {
+        details_div.style.display = 'none'
+    }
+}
+
+
+function html_escape(s) {
+    s = s.replace(/&/g,'&amp;');
+    s = s.replace(/</g,'&lt;');
+    s = s.replace(/>/g,'&gt;');
+    return s;
+}
+
+function drawCircle(pass, fail, error){
+    var color = ["#6c6","#c60","#c00"];
+    var data = [pass,fail,error];
+    var text_arr = ["pass", "fail", "error"];
+
+    var canvas = document.getElementById("circle");
+    var ctx = canvas.getContext("2d");
+    var startPoint=0;
+    var width = 20, height = 10;
+    var posX = 112 * 2 + 20, posY = 30;
+    var textX = posX + width + 5, textY = posY + 10;
+    for(var i=0;i<data.length;i++){
+        ctx.fillStyle = color[i];
+        ctx.beginPath();
+        ctx.moveTo(112,84);
+        ctx.arc(112,84,84,startPoint,startPoint+Math.PI*2*(data[i]/(data[0]+data[1]+data[2])),false);
+        ctx.fill();
+        startPoint += Math.PI*2*(data[i]/(data[0]+data[1]+data[2]));
+        ctx.fillStyle = color[i];
+        ctx.fillRect(posX, posY + 20 * i, width, height);
+        ctx.moveTo(posX, posY + 20 * i);
+        ctx.font = 'bold 14px';
+        ctx.fillStyle = color[i];
+        var percent = text_arr[i] + ":"+data[i];
+        ctx.fillText(percent, textX, textY + 20 * i);
+
+    }
+}
+
+function show_shots(obj) {
+	obj.nextElementSibling.style.display="block";
+
+}
+
+function close_shots(obj) {
+	obj.parentElement.style.display="none";
+}
+
+</script>
+<div class="piechart">
+    <div>
+        <canvas id="circle" width="350" height="168" </canvas>
+    </div>
+</div>
+<div class='heading'>
+<h1>自动化测试报告</h1>
+<p class='attribute'><strong>开始时间:</strong> 2019-12-24 02:00:23</p>
+<p class='attribute'><strong>耗时:</strong> 0:25:18.984202</p>
+<p class='attribute'><strong>状态:</strong> <span class="tj passCase">Pass</span>43 <span class="tj errorCase">Error</span>12</p>
+
+<p class='description'>报告描述</p>
+</div>
+
+
+
+<p id='show_detail_line'>显示
+<a href='javascript:showCase(0)'>概要</a>
+<a href='javascript:showCase(1)'>失败</a>
+<a href='javascript:showCase(2)'>所有</a>
+</p>
+
+<table id='result_table'>
+<colgroup>
+<col align='left' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+<col align='right' />
+</colgroup>
+<tr id='header_row'>
+    <td>测试组/测试用例</td>
+    <td>总数</td>
+    <td>通过</td>
+    <td>失败</td>
+    <td>错误</td>
+    <td>视图</td>
+    <td>错误截图</td>
+</tr>
+
+<tr class='passClass'>
+    <td>test1_register.TestRegister</td>
+    <td>4</td>
+    <td>4</td>
+    <td>0</td>
+    <td>0</td>
+    <td><a href="javascript:showClassDetail('c1',4)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='pt1.1' class='hiddenRow'>
+    <td ><div class='testcase'>test_register1: 输入正确的信息</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status passCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_pt1.1')" >
+        通过</a></span>
+
+    <div id='div_pt1.1' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_pt1.1').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+pt1.1: ['pengyong', 'wenjing@wei.cn', 'Y6+M#25q^x', 7091112063, '15643738196', '18630067973', '13052914994', '我最喜爱的电影？', '登录']
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt1.2' class='hiddenRow'>
+    <td><div class='testcase'>test_register2: 验证只输入必填项</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt1.3' class='hiddenRow'>
+    <td><div class='testcase'>test_register3: 验证不输入必填项</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt1.4' class='hiddenRow'>
+    <td><div class='testcase'>test_register4: 验证不输入邮件</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr class='errorClass'>
+    <td>test2_login.LoginTest</td>
+    <td>11</td>
+    <td>10</td>
+    <td>0</td>
+    <td>1</td>
+    <td><a href="javascript:showClassDetail('c2',11)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='pt2.1' class='hiddenRow'>
+    <td><div class='testcase'>test_login1_1: 用户名正确，密码正确登录验证</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.2' class='hiddenRow'>
+    <td><div class='testcase'>test_login1_2: 用户名正确，密码正确登录验证</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.3' class='hiddenRow'>
+    <td><div class='testcase'>test_login1_3: 用户名正确，密码正确登录验证</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft2.4' class='none'>
+    <td ><div class='testcase'>test_login2_1: 用户名为空，密码正确</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft2.4')" >
+        错误</a></span>
+
+    <div id='div_ft2.4' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft2.4').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft2.4: Traceback (most recent call last):
+  File "D:\pyhon36\lib\site-packages\ddt.py", line 145, in wrapper
+    return func(self, *args, **kwargs)
+  File "D:\testpc\ecshop\script\test2_login.py", line 42, in test_login2
+    self.login.input_username(data["username"])     # 输入用户名
+  File "D:\testpc\ecshop\page\loginpage.py", line 29, in input_username
+    self.send_keys(self.username_loc, username)
+  File "D:\testpc\ecshop\common\base.py", line 94, in send_keys
+    element.send_keys(text)  # 输入
+  File "D:\pyhon36\lib\site-packages\selenium\webdriver\remote\webelement.py", line 478, in send_keys
+    {'text': "".join(keys_to_typing(value)),
+  File "D:\pyhon36\lib\site-packages\selenium\webdriver\common\utils.py", line 150, in keys_to_typing
+    for i in range(len(val)):
+TypeError: object of type 'numpy.float64' has no len()
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt2.5' class='hiddenRow'>
+    <td><div class='testcase'>test_login3_1: 用户名、密码为空</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.6' class='hiddenRow'>
+    <td><div class='testcase'>test_login_1: 测试不记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.7' class='hiddenRow'>
+    <td><div class='testcase'>test_login_2: 测试不记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.8' class='hiddenRow'>
+    <td><div class='testcase'>test_login_3: 测试不记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.9' class='hiddenRow'>
+    <td><div class='testcase'>test_login_remember_password_1: 测试记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.10' class='hiddenRow'>
+    <td><div class='testcase'>test_login_remember_password_2: 测试记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt2.11' class='hiddenRow'>
+    <td><div class='testcase'>test_login_remember_password_3: 测试记住密码登录</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr class='errorClass'>
+    <td>test3_browse_all_goods.Test_browse_all_goods: 浏览所有商品</td>
+    <td>1</td>
+    <td>0</td>
+    <td>0</td>
+    <td>1</td>
+    <td><a href="javascript:showClassDetail('c3',1)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='ft3.1' class='none'>
+    <td ><div class='testcase'>test_browse_all_goods</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft3.1')" >
+        错误</a></span>
+
+    <div id='div_ft3.1' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft3.1').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft3.1: 元素('class name', 'go')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test3_browse_all_goods.py", line 23, in test_browse_all_goods
+    self.browse.click_search()  # 点击首页搜索按钮
+  File "D:\testpc\ecshop\page\browse_all_goods_page.py", line 11, in click_search
+    self.click(self.search_loc)
+  File "D:\testpc\ecshop\common\base.py", line 83, in click
+    element.click()  # 点击元素
+AttributeError: 'bool' object has no attribute 'click'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr class='errorClass'>
+    <td>test4_shopping_cart.TestLog</td>
+    <td>14</td>
+    <td>6</td>
+    <td>0</td>
+    <td>8</td>
+    <td><a href="javascript:showClassDetail('c4',14)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='pt4.1' class='hiddenRow'>
+    <td><div class='testcase'>test_case_0_0: 添加商品</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt4.2' class='hiddenRow'>
+    <td><div class='testcase'>test_case_1_0</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft4.3' class='none'>
+    <td ><div class='testcase'>test_case_1_1</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.3')" >
+        错误</a></span>
+
+    <div id='div_ft4.3' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.3').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.3: Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 237, in test_case_1_1
+    self.login.click_alert()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 52, in click_alert
+    self.get_alert_ok()
+  File "D:\testpc\ecshop\common\base.py", line 189, in get_alert_ok
+    alert = self.driver.switch_to.alert()
+TypeError: 'Alert' object is not callable
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='ft4.4' class='none'>
+    <td ><div class='testcase'>test_case_1_2</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.4')" >
+        错误</a></span>
+
+    <div id='div_ft4.4' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.4').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.4: Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 256, in test_case_1_2
+    self.login.click_alert_dis()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 186, in click_alert_dis
+    self.get_alert_cancel()
+  File "D:\testpc\ecshop\common\base.py", line 195, in get_alert_cancel
+    alert = self.driver.switch_to.alert()
+TypeError: 'Alert' object is not callable
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='ft4.5' class='none'>
+    <td ><div class='testcase'>test_case_1_3</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.5')" >
+        错误</a></span>
+
+    <div id='div_ft4.5' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.5').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.5: 元素('id', 'goods_number_60')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 265, in test_case_1_3
+    self.login.clear_purchase_number()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 148, in clear_purchase_number
+    self.clear(self.purchase_number_loc)
+  File "D:\testpc\ecshop\common\base.py", line 200, in clear
+    self.find_element(locator).clear()
+AttributeError: 'bool' object has no attribute 'clear'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt4.6' class='hiddenRow'>
+    <td><div class='testcase'>test_case_1_4</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft4.7' class='none'>
+    <td ><div class='testcase'>test_case_2_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.7')" >
+        错误</a></span>
+
+    <div id='div_ft4.7' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.7').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.7: 元素('id', 'goods_number_60')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 70, in test_case_2_0
+    self.login.clear_purchase_number()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 148, in clear_purchase_number
+    self.clear(self.purchase_number_loc)
+  File "D:\testpc\ecshop\common\base.py", line 200, in clear
+    self.find_element(locator).clear()
+AttributeError: 'bool' object has no attribute 'clear'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='ft4.8' class='none'>
+    <td ><div class='testcase'>test_case_3_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.8')" >
+        错误</a></span>
+
+    <div id='div_ft4.8' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.8').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.8: 元素('id', 'goods_number_60')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 90, in test_case_3_0
+    self.login.clear_purchase_number()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 148, in clear_purchase_number
+    self.clear(self.purchase_number_loc)
+  File "D:\testpc\ecshop\common\base.py", line 200, in clear
+    self.find_element(locator).clear()
+AttributeError: 'bool' object has no attribute 'clear'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='ft4.9' class='none'>
+    <td ><div class='testcase'>test_case_4_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.9')" >
+        错误</a></span>
+
+    <div id='div_ft4.9' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.9').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.9: 元素('id', 'goods_number_60')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 110, in test_case_4_0
+    self.login.clear_purchase_number()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 148, in clear_purchase_number
+    self.clear(self.purchase_number_loc)
+  File "D:\testpc\ecshop\common\base.py", line 200, in clear
+    self.find_element(locator).clear()
+AttributeError: 'bool' object has no attribute 'clear'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='ft4.10' class='none'>
+    <td ><div class='testcase'>test_case_5_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.10')" >
+        错误</a></span>
+
+    <div id='div_ft4.10' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.10').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.10: 元素('id', 'goods_number_60')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 130, in test_case_5_0
+    self.login.clear_purchase_number()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 148, in clear_purchase_number
+    self.clear(self.purchase_number_loc)
+  File "D:\testpc\ecshop\common\base.py", line 200, in clear
+    self.find_element(locator).clear()
+AttributeError: 'bool' object has no attribute 'clear'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt4.11' class='hiddenRow'>
+    <td ><div class='testcase'>test_case_6_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status passCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_pt4.11')" >
+        通过</a></span>
+
+    <div id='div_pt4.11' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_pt4.11').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+pt4.11: 元素('class name', 'f6')没找到
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt4.12' class='hiddenRow'>
+    <td><div class='testcase'>test_case_7_0</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt4.13' class='hiddenRow'>
+    <td><div class='testcase'>test_case_8_0</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft4.14' class='none'>
+    <td ><div class='testcase'>test_case_9_0</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft4.14')" >
+        错误</a></span>
+
+    <div id='div_ft4.14' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft4.14').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft4.14: 元素('css selector', 'div.all_ms&gt;a:nth-of-type(3)')没找到
+Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test4_shopping_cart.py", line 215, in test_case_9_0
+    self.login.click_balancing()
+  File "D:\testpc\ecshop\page\shopping_car_page.py", line 104, in click_balancing
+    self.click(self.balancing_car_loc)
+  File "D:\testpc\ecshop\common\base.py", line 83, in click
+    element.click()  # 点击元素
+AttributeError: 'bool' object has no attribute 'click'
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr class='passClass'>
+    <td>test5_pace_order.TestPaceOrder</td>
+    <td>19</td>
+    <td>19</td>
+    <td>0</td>
+    <td>0</td>
+    <td><a href="javascript:showClassDetail('c5',19)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='pt5.1' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_amend_goods_address</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.2' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_amend_goods_list</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.3' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_balance</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.4' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_cancel_order</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.5' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_card</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.6' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_card_greetings</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.7' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_card_greetings_more</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.8' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_input_postscript</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.9' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_inv_first_payee</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.10' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_inv_first_payee_no</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.11' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_inv_second_payee</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.12' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_inv_second_payee_no</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.13' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_negotiate</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.14' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_no_balance</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.15' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_packing</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.16' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_payment_bank</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.17' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_payment_cash_on_delivery</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.18' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_post_office</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt5.19' class='hiddenRow'>
+    <td><div class='testcase'>test_pace_order_see_card_packing</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr class='errorClass'>
+    <td>test6_consignee_address.TestConsigneeAdress</td>
+    <td>6</td>
+    <td>4</td>
+    <td>0</td>
+    <td>2</td>
+    <td><a href="javascript:showClassDetail('c6',6)">详情</a></td>
+    <td>&nbsp;</td>
+</tr>
+
+<tr id='pt6.1' class='hiddenRow'>
+    <td><div class='testcase'>test_case_1_consignee_address: 测试用例收货地址全部信息填写</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt6.2' class='hiddenRow'>
+    <td><div class='testcase'>test_case_2_modify_address: 修改收货地址框</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft6.3' class='none'>
+    <td ><div class='testcase'>test_case_3_del_address: 删除收货地址</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft6.3')" >
+        错误</a></span>
+
+    <div id='div_ft6.3' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft6.3').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft6.3: Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test6_consignee_address.py", line 62, in test_case_3_del_address
+    self.csif.click_alert_yes()
+  File "D:\testpc\ecshop\page\consignee_address_page.py", line 148, in click_alert_yes
+    self.get_alert_ok()
+  File "D:\testpc\ecshop\common\base.py", line 189, in get_alert_ok
+    alert = self.driver.switch_to.alert()
+TypeError: 'Alert' object is not callable
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='pt6.4' class='hiddenRow'>
+    <td><div class='testcase'>test_case_4_must_address: 填写必填项新增地址</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='pt6.5' class='hiddenRow'>
+    <td><div class='testcase'>test_case_5_add_address: 新增地址填写全部信息</div></td>
+    <td colspan='5' align='center'><span class='status passCase'>通过</span></td>
+    <td></td>
+</tr>
+
+<tr id='ft6.6' class='none'>
+    <td ><div class='testcase'>test_case_6_new_address: 添加一个新的收货地址</div></td>
+    <td colspan='5' align='center'>
+
+    <!--css div popup start-->
+    <span class='status errorCase'>
+    <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_ft6.6')" >
+        错误</a></span>
+
+    <div id='div_ft6.6' class="popup_window">
+        <div style='text-align: right; color:red;cursor:pointer'>
+        <a onfocus='this.blur();' onclick="document.getElementById('div_ft6.6').style.display = 'none' " >
+           [x]</a>
+        </div>
+        <pre>
+        
+ft6.6: Traceback (most recent call last):
+  File "D:\testpc\ecshop\script\test6_consignee_address.py", line 101, in test_case_6_new_address
+    self.csif.add_city()
+  File "D:\testpc\ecshop\page\consignee_address_page.py", line 112, in add_city
+    self.select_by_index(self.add_city_loc)
+  File "D:\testpc\ecshop\common\base.py", line 176, in select_by_index
+    num = random.randint(1, count_option - 1)  # 随机数
+  File "D:\pyhon36\lib\random.py", line 221, in randint
+    return self.randrange(a, b+1)
+  File "D:\pyhon36\lib\random.py", line 199, in randrange
+    raise ValueError("empty range for randrange() (%d,%d, %d)" % (istart, istop, width))
+ValueError: empty range for randrange() (1,1, 0)
+
+
+        </pre>
+    </div>
+    <!--css div popup end-->
+
+    </td>
+    <td></td>
+</tr>
+
+<tr id='total_row'>
+    <td>统计</td>
+    <td>55</td>
+    <td>43</td>
+    <td>0</td>
+    <td>12</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+</tr>
+</table>
+<script>
+    drawCircle(43, 0, 12)
+</script>
+
+<div id='ending'>&nbsp;</div>
+
+</body>
+</html>
